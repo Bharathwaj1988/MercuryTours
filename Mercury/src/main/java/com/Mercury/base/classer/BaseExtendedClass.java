@@ -1,9 +1,21 @@
 package com.Mercury.base.classer;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
 import org.openqa.selenium.ElementNotInteractableException;
+import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -207,63 +219,151 @@ public class BaseExtendedClass implements Browser, Elements{
 
 	}
 	public void start_App(String url) {
-		// TODO Auto-generated method stub
+		driver.get(url);
 		
 	}
 	public void start_App(String browser, String url) {
-		// TODO Auto-generated method stub
+		try {
+			if(browser.equalsIgnoreCase("chrome")) {
+				System.setProperty("webdriver.chrome.driver", "./drivers/chromedriver.exe");
+				driver=new ChromeDriver();
+			}else if(browser.equalsIgnoreCase("firefox")) {
+				System.setProperty("webdriver.firefox.driver","./drivers/firefoxdriver.exe");
+				driver= new FirefoxDriver();
+			}
+			
+			driver.navigate().to(url);
+			driver.manage().window().maximize();
+			driver.manage().timeouts().implicitlyWait(30,TimeUnit.SECONDS);
+		}catch(Exception e) {
+			System.out.println("there is a problem in initializing the browser");
+			throw new RuntimeException();
+		}
 		
 	}
 	public WebElement locate_Element(String locatorType, String value) {
-		// TODO Auto-generated method stub
+		try {
+			switch(locatorType.toLowerCase()) {
+			case "id": driver.findElementById(value);
+			case "Name": driver.findElement(By.name(value));
+			case "class":driver.findElement(By.className(value));
+			case "link": driver.findElement(By.linkText(value));
+			case "xpath": driver.findElement(By.xpath(value));
+			case "css": driver.findElement(By.cssSelector(value));
+			}
+		}catch(NoSuchElementException e) {
+			System.out.println("The LocatorType "+locatorType+" with the value "+value+" is not available");
+		}
 		return null;
 	}
 	public void switch_To_Alert() {
-		// TODO Auto-generated method stub
+		driver.switchTo().alert();
 		
 	}
 	public void accept_Alert() {
-		// TODO Auto-generated method stub
+		String text="";
+		try {
+			wait=new WebDriverWait(driver,10);
+			wait.until(ExpectedConditions.alertIsPresent());
+			Alert alert=driver.switchTo().alert();
+			text=alert.getText();
+			alert.accept();
+			System.out.println("Alert is accepted");
+		}
+		catch(NoAlertPresentException e) {
+			System.out.println("Alert is not present" + e);
+		}
+		catch(WebDriverException e) {
+			System.out.println("WebDriverException" + e.getMessage());
+		}
 		
 	}
 	public void dismiss_Alert() {
-		// TODO Auto-generated method stub
+		String text="";
+		try {
+			wait=new WebDriverWait(driver,10);
+			wait.until(ExpectedConditions.alertIsPresent());
+			Alert alert=driver.switchTo().alert();
+			text=alert.getText();
+			alert.dismiss();;
+			System.out.println("Alert is accepted");
+		}
+		catch(NoAlertPresentException e) {
+			System.out.println("Alert is not present" + e);
+		}
+		catch(WebDriverException e) {
+			System.out.println("WebDriverException" + e.getMessage());
+		}
 		
 	}
 	public String get_Alert_Text() {
-		// TODO Auto-generated method stub
-		return null;
+		String text="";
+		try {
+			wait=new WebDriverWait(driver,10);
+			wait.until(ExpectedConditions.alertIsPresent());
+			Alert alert=driver.switchTo().alert();
+			text=alert.getText();
+			}
+		catch(NoAlertPresentException e) {
+			System.out.println("Alert is not present" + e);
+		}
+		catch(WebDriverException e) {
+			System.out.println("WebDriverException" + e.getMessage());
+		}
+		return text;
 	}
 	public void type_Alert(String input) {
-		// TODO Auto-generated method stub
+		driver.switchTo().alert().sendKeys(input);
 		
 	}
 	public void switch_To_Window(int index) {
-		// TODO Auto-generated method stub
+		try {
+		Set<String> allWindows=driver.getWindowHandles();
+		List<String> allHandles=new ArrayList<String>(allWindows);
+		String exWindow=allHandles.get(index);
+		driver.switchTo().window(exWindow);
+		System.out.println("Window switched successfully");
+		}
+		catch(NoSuchWindowException e) {
+			System.out.println("there is no Window with the given Index");
+		}
+		
 		
 	}
 	public void switch_To_Frame(int index) {
-		// TODO Auto-generated method stub
+		driver.switchTo().frame(index);
 		
 	}
 	public void default_Content() {
-		// TODO Auto-generated method stub
+		driver.switchTo().defaultContent();
 		
 	}
 	public boolean verify_Title(String title) {
-		// TODO Auto-generated method stub
-		return false;
+		if(driver.getTitle().equals(title)) {
+			System.out.println("The Title Matches");
+			return true;
+		}else {
+			System.out.println("The Title doesnt Match");
+			return false;
+		}
+		
 	}
 	public boolean verify_URL(String url) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+		if(driver.getCurrentUrl().equals(url)) {
+			System.out.println("the URL Matches");
+			return true;
+		}else {
+			System.out.println("URL doesnt Match");
+			return false;
+		}
+	}		
+		
 	public void close() {
-		// TODO Auto-generated method stub
+		driver.close();
 		
 	}
 	public void quit() {
-		// TODO Auto-generated method stub
+		driver.quit();
 		
 	}
 	
